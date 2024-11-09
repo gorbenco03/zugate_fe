@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { handleFileChange } from '../helpers/select-pdf';
-import { isFormComplete } from '../helpers/check-form';
+import { handleFileChange } from '../../helpers/select-pdf';
+import { isFormComplete } from '../../helpers/check-form';
 
 interface InputContainerProps {
   onSubmit: (file: File | null, quizQuestions: string, responsesPerQuestion: string, studentsPresent: string) => void;
