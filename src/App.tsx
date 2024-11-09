@@ -1,14 +1,27 @@
+// src/App.tsx
 import React from 'react';
-import './App.css';
-import AddQuizButton from './containers/add-quiz-butt'; // Import the AddQuizButton component
-
-function App() {
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+const App: React.FC = () => {
   return (
-    <div className="App bg-white min-h-screen py-12 flex justify-center items-center">
-      {/* Use AddQuizButton to trigger the modal */}
-      <AddQuizButton />
-    </div>
+
+
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute requiredRole="teacher">
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
