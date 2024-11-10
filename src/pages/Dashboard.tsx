@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import FeedbackComponent from '../components/FeedbackComponent';
 import { format, addDays, subDays } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import {
@@ -748,6 +749,7 @@ const Dashboard: React.FC = () => {
                       </div>
                     )}
                     <PresenceChecker lessonId={selectedLesson._id} />
+                    <FeedbackComponent lessonId={selectedLesson._id} />
                   </div>
                 ) : (
                   <div className="h-full flex items-center justify-center">
