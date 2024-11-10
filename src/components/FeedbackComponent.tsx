@@ -1,54 +1,14 @@
-// src/components/FeedbackComponent.tsx
-
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
-interface FeedbackResponse {
-  lesson: string;
-  summary: SummaryObject;
-}
-
-interface SummaryObject {
-  id: string;
-  object: string;
-  created: number;
-  model: string;
-  choices: Choice[];
-  usage: Usage;
-  system_fingerprint: string;
-}
-
-interface Choice {
-  index: number;
-  message: Message;
-  logprobs: any;
-  finish_reason: string;
-}
-
-interface Message {
-  role: string;
-  content: string;
-  refusal: any;
-}
-
-interface Usage {
-  prompt_tokens: number;
-  completion_tokens: number;
-  total_tokens: number;
-  prompt_tokens_details: {
-    cached_tokens: number;
-    audio_tokens: number;
-  };
-  completion_tokens_details: {
-    reasoning_tokens: number;
-    audio_tokens: number;
-    accepted_prediction_tokens: number;
-    rejected_prediction_tokens: number;
-  };
-}
-
 interface FeedbackComponentProps {
   lessonId: string;
+}
+
+// Simplified interface structure based on actual API response
+interface FeedbackResponse {
+  lesson: string;
+  summary: string;  // Changed to expect direct string instead of complex object
 }
 
 const FeedbackComponent: React.FC<FeedbackComponentProps> = ({ lessonId }) => {
@@ -73,32 +33,29 @@ const FeedbackComponent: React.FC<FeedbackComponentProps> = ({ lessonId }) => {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
           },
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch feedback');
+          throw new Error(
+            response.status === 404 
+              ? 'No feedback available for this lesson.' 
+              : 'Failed to fetch feedback'
+          );
         }
 
         const data: FeedbackResponse = await response.json();
-console.log(data.summary.choices[0].message.content)
-        // Verifică structura răspunsului și extrage textul sumarului
-        if (
-          data.summary &&
-          data.summary.choices &&
-          data.summary.choices.length > 0 &&
-          data.summary.choices[0].message &&
-          data.summary.choices[0].message.content
-        ) {
-          setSummary(data.summary.choices[0].message.content);
+        
+        // Check if summary exists and is a string
+        if (typeof data.summary === 'string' && data.summary.trim()) {
+          setSummary(data.summary);
         } else {
           setError('Feedback summary is unavailable.');
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error('Error fetching feedback:', err);
-        setError(err.message || 'Failed to fetch feedback');
+        setError(err instanceof Error ? err.message : 'Failed to fetch feedback');
       } finally {
         setLoading(false);
       }
@@ -107,18 +64,32 @@ console.log(data.summary.choices[0].message.content)
     fetchFeedback();
   }, [lessonId, token]);
 
+  if (loading) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto bg-white shadow-md rounded-md">
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 max-w-2xl mx-auto bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-semibold mb-4">Feedback Despre Profesori</h2>
+      <h2 className="text-2xl font-semibold mb-4">Feedback Despre Lecție</h2>
 
-      {loading && <p className="text-gray-500">Se încarcă...</p>}
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-
-      {!loading && !error && summary && (
-        <div className="mt-4 p-4 bg-gray-100 rounded-md">
-          <h3 className="text-xl font-semibold mb-2">Sumar Feedback:</h3>
-          <p className="text-gray-800">{summary}</p>
+      {error ? (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-600">{error}</p>
         </div>
+      ) : summary ? (
+        <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-md">
+          <h3 className="text-xl font-semibold mb-2">Sumar Feedback:</h3>
+          <p className="text-gray-800 whitespace-pre-wrap">{summary}</p>
+        </div>
+      ) : (
+        <p className="text-gray-500">Nu există feedback disponibil pentru această lecție.</p>
       )}
     </div>
   );
