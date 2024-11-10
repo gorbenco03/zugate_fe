@@ -91,7 +91,7 @@ interface UploadConfig {
 }
 
 // API Service
-const API_BASE_URL = 'http://localhost:5001/api/teacher';
+const API_BASE_URL = 'https://zugate.study/api/teacher';
 
 const apiService = {
   async fetchWithAuth(endpoint: string, options: RequestInit = {}) {

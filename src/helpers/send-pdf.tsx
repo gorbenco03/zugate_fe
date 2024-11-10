@@ -16,7 +16,7 @@ export async function handleSubmit(
     formData.append("studentsPresent", studentsPresent);
 
     try {
-      const response = await fetch("http://localhost:5001/lessons/:id/upload", {
+      const response = await fetch("https://zugate.study/lessons/:id/upload", {
         method: "POST",
         body: formData,
       });
