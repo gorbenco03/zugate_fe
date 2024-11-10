@@ -14,7 +14,8 @@ import {
   Edit2,
   MessageSquare,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  LogOut
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/card';
 import { Alert, AlertDescription } from '../components/alert';
@@ -29,7 +30,8 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { AuthContext } from '../context/AuthContext';
-
+import PresenceChecker from '../components/feedback'; 
+import { useNavigate } from 'react-router-dom';
 // Types
 interface Question {
   questionText: string;
@@ -353,6 +355,14 @@ const Dashboard: React.FC = () => {
     numQuestions: 5,
     numAnswers: 4,
   });
+  const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  // Adaugă această funcție pentru gestionarea logout-ului
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   useEffect(() => {
     const fetchLessons = async () => {
@@ -424,6 +434,13 @@ const Dashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <h1 className="text-xl font-bold text-gray-800">Teacher Dashboard</h1>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors duration-200"
+            >
+              <LogOut className="w-4 h-4" />
+              Deconectare
+            </button>
           </div>
         </div>
       </nav>
@@ -484,11 +501,15 @@ const Dashboard: React.FC = () => {
                                 {lesson.quizzes.length} quiz(zes)
                               </span>
                             </span>
+                            
                           )}
+                          
                         </div>
                       </button>
+                      
                     ))}
                   </div>
+                  
                 )}
               </CardContent>
             </Card>
@@ -503,8 +524,9 @@ const Dashboard: React.FC = () => {
                     <div>
                       <h2 className="text-2xl font-bold">{selectedLesson.title}</h2>
                       <p className="text-gray-500">{selectedLesson.description}</p>
+                      
                     </div>
-
+                    
                     {/* Quiz List */}
                     {quizzes.length > 0 && (
                       <div>
@@ -725,6 +747,7 @@ const Dashboard: React.FC = () => {
                         </div>
                       </div>
                     )}
+                    <PresenceChecker lessonId={selectedLesson._id} />
                   </div>
                 ) : (
                   <div className="h-full flex items-center justify-center">

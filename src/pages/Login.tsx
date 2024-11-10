@@ -23,49 +23,49 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { setToken } = useContext(AuthContext);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
+  // src/pages/Login.tsx
+// Modifică doar funcția handleSubmit:
 
-    try {
-      const response = await fetch('http://localhost:5001/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
+  setIsLoading(true);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Eroare la autentificare');
-      }
+  try {
+    const response = await fetch('http://localhost:5001/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data: LoginResponse = await response.json();
-      
-      try {
-        const decoded = jwtDecode<JwtPayload>(data.token);
-        if (decoded.user.role === 'teacher') {
-          setToken(data.token);
-          if (rememberMe) {
-            localStorage.setItem('token', data.token);
-          }
-          navigate('/dashboard');
-        } else {
-          setError('Acces limitat la dashboard. Doar profesorii au acces.');
-        }
-      } catch (err) {
-        console.error('Eroare la decodarea token-ului:', err);
-        setError('Token invalid');
-      }
-    } catch (err: any) {
-      console.error('Eroare la autentificare:', err);
-      setError(err.message || 'Eroare la autentificare');
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Eroare la autentificare');
     }
-  };
+
+    const data: LoginResponse = await response.json();
+    
+    try {
+      const decoded = jwtDecode<JwtPayload>(data.token);
+      if (decoded.user.role === 'teacher') {
+        setToken(data.token); // Token-ul va fi salvat automat în localStorage
+        navigate('/dashboard');
+      } else {
+        setError('Acces limitat la dashboard. Doar profesorii au acces.');
+      }
+    } catch (err) {
+      console.error('Eroare la decodarea token-ului:', err);
+      setError('Token invalid');
+    }
+  } catch (err: any) {
+    console.error('Eroare la autentificare:', err);
+    setError(err.message || 'Eroare la autentificare');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">

@@ -1,18 +1,12 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { JwtPayload } from '../types/auth';
 
 interface AuthContextType {
   token: string | null;
   role: string | null;
   setToken: (token: string | null) => void;
   logout: () => void;
-}
-
-interface JwtPayload {
-  user: {
-    id: string;
-    role: string;
-  };
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -24,9 +18,32 @@ export const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setTokenState] = useState<string | null>(() => {
-    return localStorage.getItem('token');
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      try {
+        const decoded = jwtDecode<JwtPayload>(storedToken);
+        if (decoded.user && decoded.user.role) {
+          return storedToken;
+        }
+      } catch (error) {
+        localStorage.removeItem('token');
+      }
+    }
+    return null;
   });
-  const [role, setRole] = useState<string | null>(null);
+  
+  const [role, setRole] = useState<string | null>(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      try {
+        const decoded = jwtDecode<JwtPayload>(storedToken);
+        return decoded.user.role;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
 
   useEffect(() => {
     if (token) {
@@ -41,13 +58,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setRole(null);
       }
     } else {
-      localStorage.removeItem('token');
       setRole(null);
     }
   }, [token]);
 
   const setToken = (newToken: string | null) => {
-    setTokenState(newToken);
+    if (newToken) {
+      localStorage.setItem('token', newToken);
+      setTokenState(newToken);
+    } else {
+      localStorage.removeItem('token');
+      setTokenState(null);
+      setRole(null);
+    }
   };
 
   const logout = () => {
