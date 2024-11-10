@@ -43,20 +43,21 @@ const Login: React.FC = () => {
       }
 
       const data: LoginResponse = await response.json();
-      const { token } = data;
-
-      setToken(token);
-      if (rememberMe) {
-        localStorage.setItem('token', token);
-      }
-
-      const payload: JwtPayload = jwtDecode(token);
-      const userRole = payload.user.role;
-
-      if (userRole === 'teacher') {
-        navigate('/dashboard');
-      } else {
-        setError('Acces limitat la dashboard.');
+      
+      try {
+        const decoded = jwtDecode<JwtPayload>(data.token);
+        if (decoded.user.role === 'teacher') {
+          setToken(data.token);
+          if (rememberMe) {
+            localStorage.setItem('token', data.token);
+          }
+          navigate('/dashboard');
+        } else {
+          setError('Acces limitat la dashboard. Doar profesorii au acces.');
+        }
+      } catch (err) {
+        console.error('Eroare la decodarea token-ului:', err);
+        setError('Token invalid');
       }
     } catch (err: any) {
       console.error('Eroare la autentificare:', err);
@@ -210,8 +211,6 @@ const Login: React.FC = () => {
             </button>
           </div>
         </form>
-
-        
       </div>
     </div>
   );

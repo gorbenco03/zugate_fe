@@ -1,10 +1,9 @@
-// src/components/ProtectedRoute.tsx
 import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 interface ProtectedRouteProps {
-  children: React.ReactElement;
+  children: React.ReactNode;
   requiredRole: string;
 }
 
@@ -19,7 +18,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     return <Navigate to="/" replace />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
